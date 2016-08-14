@@ -1,0 +1,141 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+	     <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+		 <!-- 创建一个名为mian的div层 -->
+	    <div id="main" style="height:800px"></div>
+
+    <script  src="/static/lib/js/jquery-1.11.0.min.js"></script>
+    <script  src="/static/lib/js/echarts.js"></script>
+
+    <script type="text/javascript">
+
+        var clockData;
+        var valueData;
+
+        // getData form zabbix_api
+         $.getJSON("/zabbix_apiTestp",function(data){
+
+
+	        // 基于准备好的dom，初始化echarts实例
+             var myChart = echarts.init(document.getElementById('main'));
+
+             //返回一个图表option
+             var option = optionFacatory(data);
+
+            // 使用刚指定的配置项和数据显示图表。
+             myChart.setOption(option);
+          });
+
+
+{#      //构造一个option返回景区#}
+       function optionFacatory(data) {
+
+            option = {
+                tooltip: {
+                    trigger: 'axis',
+                    position: function (pt) {
+                        return [pt[0], '10%'];
+                    }
+                },
+                title: { //标题
+                    left: 'center',
+                    text: '数据流量图',
+                },
+                legend: { // 图例 放在下方
+                    // top: 'bottom',
+                    show:true,
+                	data:['流量'],
+                },
+                toolbox: {
+                    feature: {
+                        dataZoom: {
+                            yAxisIndex: 'none'
+                        },
+                        restore: {},
+                        saveAsImage: {}
+                    }
+                },
+                xAxis: { //定义x轴上的格式
+                    type: 'category',
+                    boundaryGap: false, //坐标轴两端空白策略
+                    data: data.clockList //x轴上的数据源
+                },
+                yAxis: {//定义x轴上的格式
+                    type: 'value',
+                    boundaryGap: [0, '100%']//坐标轴两端空白策略
+                },
+                dataZoom: [{ //滚动条定义
+                    type: 'inside', //内置型数据区域缩放组件
+                    start: 0, //起始比例
+                    end: 10//结束比例
+                }, {
+                    start: 0,//起始比例
+                    end: 10,//结束比例
+                    //手柄的 icon 形状，支持路径字符串
+                    handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+                    // 控制手柄的尺寸
+                    handleSize: '80%',
+                    //手柄的样式配置
+                    handleStyle: {
+                        color: '#fff',//颜色
+                        shadowBlur: 3,//图形阴影的模糊大小
+                        shadowColor: 'rgba(0, 0, 0, 0.6)', //阴影颜色
+                        shadowOffsetX: 2, //阴影水平方向上的偏移距离。
+                        shadowOffsetY: 2 //阴影垂直方向上的偏移距离。
+                    }
+                }],
+                series: [
+                    {
+                        name: '模拟数据',
+                        type: 'line',//图形类型
+                        smooth: true,//平滑模式
+                        symbol: 'none',//标记的图形
+                        //折线图在数据量远大于像素点时候的降采样策略，开启后可以有效的优化图表的绘制效率，默认关闭，也就是全部绘制不过滤数据点。
+                        // 'average' 取过滤点的平均值
+                        // 'max' 取过滤点的最大值
+                        // 'min' 取过滤点的最小值
+                        // 'sum' 取过滤点的和
+                        sampling: 'average',
+                        //折线拐点标志的样式。
+                        itemStyle: {
+                            normal: {
+                                //颜色
+                                color: 'rgb(255, 70, 131)'
+                            }
+                        },
+                        //单项区域填充样式
+                        areaStyle: {
+                            normal: {
+                                //
+                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                    //0% 处的颜色
+                                    offset: 0,
+                                    color: 'rgb(255, 158, 68)'
+                                }, {
+                                    // 100% 处的颜色
+                                    offset: 1,
+                                    color: 'rgb(255, 70, 131)'
+                                }])
+                            }
+                        },
+
+                        data: data.valueList //具体数据
+                    }
+                ]
+            };
+
+            return option;
+        }
+
+
+
+
+    </script>
+</body>
+</html>
